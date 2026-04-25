@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>M2Lab.io Agent Skills — reusable Cascade & Claude skills</title>
+  <meta name="description" content="A curated, reusable collection of Cascade (Windsurf), Claude Code, Cursor, and VS Code agent skills by M2Lab.io — eval-driven development, debugging discipline, PR hygiene, spec-before-code, and more." />
+  <meta property="og:title" content="M2Lab.io Agent Skills" />
+  <meta property="og:description" content="Reusable agent skills by M2Lab.io: eval-driven development, debugging discipline, PR hygiene, spec-before-code, and more." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://m2laborg.github.io/agent-skills/" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+    code, pre, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    .gradient-text {
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .card-glow {
+      transition: all .2s ease;
+    }
+    .card-glow:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px -12px rgba(99,102,241,.35), 0 0 0 1px rgba(99,102,241,.25);
+    }
+    .grid-bg {
+      background-image:
+        radial-gradient(circle at 20% 0%, rgba(99,102,241,.10), transparent 50%),
+        radial-gradient(circle at 80% 30%, rgba(236,72,153,.08), transparent 45%);
+    }
+    /* sidebar active state */
+    .nav-link.active {
+      background: rgb(238 242 255);
+      color: rgb(67 56 202);
+      font-weight: 600;
+    }
+    /* hide scrollbar in sidebar */
+    .sidebar::-webkit-scrollbar { width: 6px; }
+    .sidebar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased">
+
+  <!-- mobile top bar -->
+  <div class="lg:hidden sticky top-0 z-40 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-2 font-bold">
+      <span class="inline-block w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-pink-500 grid place-items-center text-white text-sm">M2</span>
+      <span>Skills</span>
+    </a>
+    <button id="menu-btn" aria-label="Open menu" class="p-2 rounded-md hover:bg-slate-100">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+
+  <div class="flex">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar fixed lg:sticky top-0 left-0 h-screen w-72 bg-white border-r border-slate-200 overflow-y-auto z-50 transform -translate-x-full lg:translate-x-0 transition-transform">
+      <div class="p-6">
+        <a href="#" class="flex items-center gap-2.5 font-bold text-lg mb-1">
+          <span class="inline-block w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 grid place-items-center text-white text-sm shadow-sm">M2</span>
+          <span>M2Lab.io Skills</span>
+        </a>
+        <p class="text-xs text-slate-500 ml-11">Works with any IDE</p>
+      </div>
+
+      <nav class="px-4 pb-6 space-y-6">
+        <div>
+          <p class="px-3 text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2">Overview</p>
+          <ul class="space-y-0.5 text-sm">
+            <li><a class="nav-link block px-3 py-2 rounded-md text-slate-700 hover:bg-slate-100" href="#top">Home</a></li>
+            <li><a class="nav-link block px-3 py-2 rounded-md text-slate-700 hover:bg-slate-100" href="#use">How to use</a></li>
+            <li><a class="nav-link block px-3 py-2 rounded-md text-slate-700 hover:bg-slate-100" href="#authoring">Authoring</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <p class="px-3 text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2">Skills</p>
+          <ul id="sidebar-skills" class="space-y-0.5 text-sm"></ul>
+        </div>
+
+        <div>
+          <p class="px-3 text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2">Links</p>
+          <ul class="space-y-0.5 text-sm">
+            <li><a class="block px-3 py-2 rounded-md text-slate-700 hover:bg-slate-100" href="https://github.com/M2LabOrg/agent-skills">GitHub repo ↗</a></li>
+            <li><a class="block px-3 py-2 rounded-md text-slate-700 hover:bg-slate-100" href="https://code.claude.com/docs/en/skills">Anthropic skills docs ↗</a></li>
+          </ul>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- backdrop for mobile -->
+    <div id="backdrop" class="fixed inset-0 bg-slate-900/30 z-40 hidden lg:hidden"></div>
+
+    <!-- MAIN -->
+    <main class="flex-1 min-w-0">
+
+      <!-- hero -->
+      <header id="top" class="grid-bg border-b border-slate-200">
+        <div class="max-w-5xl mx-auto px-6 lg:px-12 pt-16 lg:pt-24 pb-20">
+          <p class="text-xs uppercase tracking-widest text-indigo-600 font-semibold mb-4">Cascade · Claude Code · Cursor · VS Code · any IDE</p>
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] mb-6 text-slate-900">
+            Reusable <span class="gradient-text">AI coding skills</span><br/>by M2Lab.io.
+          </h1>
+          <p class="text-lg text-slate-600 max-w-2xl mb-8">
+            A curated collection of <strong class="text-slate-900">methodologies</strong>, not project rules — eval-driven development, debugging discipline, PR hygiene, spec-before-code — packaged so any AI assistant can apply them consistently across every project.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <a href="#use" class="px-5 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-sm">Get started</a>
+            <a href="https://github.com/M2LabOrg/agent-skills" class="px-5 py-3 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-medium">View on GitHub</a>
+          </div>
+        </div>
+      </header>
+
+      <!-- usage (moved to top) -->
+      <section id="use" class="bg-white border-b border-slate-200">
+        <div class="max-w-5xl mx-auto px-6 lg:px-12 py-16">
+          <h2 class="text-3xl font-bold text-slate-900 mb-2">Loading skills into a new project</h2>
+          <p class="text-slate-500 mb-10">Pick the option that fits how the project is run.</p>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <div class="rounded-xl border border-slate-200 p-6 bg-slate-50/50">
+              <h3 class="font-semibold text-base mb-2 text-slate-900">1. Symlink <span class="text-xs text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded ml-1">recommended</span></h3>
+              <p class="text-sm text-slate-600 mb-4">Single dev machine. Edits propagate instantly.</p>
+<pre class="text-[13px] leading-relaxed bg-slate-900 text-slate-100 rounded-md p-4 whitespace-pre-wrap break-words"><code>git clone git@github.com:M2LabOrg/agent-skills.git ~/dev/M2LabOrg-skills
+
+mkdir -p &lt;project&gt;/.claude/skills
+ln -s ~/dev/M2LabOrg-skills/debugging-discipline \
+      &lt;project&gt;/.claude/skills/debugging-discipline
+
+echo ".claude/skills/" &gt;&gt; &lt;project&gt;/.gitignore</code></pre>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 p-6 bg-slate-50/50">
+              <h3 class="font-semibold text-base mb-2 text-slate-900">2. Git submodule <span class="text-xs text-indigo-700 bg-indigo-100 px-1.5 py-0.5 rounded ml-1">pinned</span></h3>
+              <p class="text-sm text-slate-600 mb-4">Each project pins a commit. Good for teams.</p>
+<pre class="text-[13px] leading-relaxed bg-slate-900 text-slate-100 rounded-md p-4 whitespace-pre-wrap break-words"><code>git submodule add \
+  git@github.com:M2LabOrg/agent-skills.git \
+  .claude/skills
+
+git commit -m "chore: pin skills submodule"</code></pre>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 p-6 bg-slate-50/50">
+              <h3 class="font-semibold text-base mb-2 text-slate-900">3. Shallow clone <span class="text-xs text-pink-700 bg-pink-100 px-1.5 py-0.5 rounded ml-1">CI / RunPod</span></h3>
+              <p class="text-sm text-slate-600 mb-4">Ephemeral environments where symlinks don't survive.</p>
+<pre class="text-[13px] leading-relaxed bg-slate-900 text-slate-100 rounded-md p-4 whitespace-pre-wrap break-words"><code>git clone --depth 1 \
+  https://github.com/M2LabOrg/agent-skills.git \
+  .claude/skills
+
+echo ".claude/skills/" &gt;&gt; .gitignore</code></pre>
+            </div>
+          </div>
+
+          <p class="text-sm text-slate-500 mt-8">
+            Any IDE that supports the <code class="text-pink-600 bg-pink-50 px-1.5 py-0.5 rounded">.claude/skills/</code> convention — Cascade (Windsurf), Claude Code, Cursor, VS Code with the Claude extension, and others — will pick these skills up automatically. See the <a class="text-indigo-600 hover:underline" href="https://code.claude.com/docs/en/skills">Anthropic skills docs</a>.
+          </p>
+        </div>
+      </section>
+
+      <!-- skills grid (with search & filter) -->
+      <section id="skills" class="max-w-5xl mx-auto px-6 lg:px-12 py-16">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+          <div>
+            <h2 class="text-3xl font-bold text-slate-900">The skills</h2>
+            <p class="text-slate-500 mt-1">One folder, one <code class="text-pink-600 bg-pink-50 px-1.5 py-0.5 rounded">SKILL.md</code>, one job done well.</p>
+          </div>
+          <span id="count" class="text-sm text-slate-500"></span>
+        </div>
+
+        <div class="mb-6 flex flex-col md:flex-row gap-3 md:items-center">
+          <div class="relative flex-1">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input id="search" type="search" placeholder="Search skills by name, scope, or description…" autocomplete="off"
+              class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-slate-300 bg-white text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+            <kbd class="hidden md:inline-block absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] text-slate-500 bg-slate-100 border border-slate-200 rounded">/</kbd>
+          </div>
+          <div id="filters" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <div id="grid" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+        <p id="empty" class="hidden text-center text-slate-500 py-12">No skills match your search.</p>
+      </section>
+
+      <!-- authoring -->
+      <section id="authoring" class="max-w-5xl mx-auto px-6 lg:px-12 py-16">
+        <h2 class="text-3xl font-bold text-slate-900 mb-2">Authoring conventions</h2>
+        <p class="text-slate-500 mb-8">What makes a skill in this collection.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="rounded-xl border border-slate-200 p-6 bg-white">
+            <h3 class="font-semibold mb-2 text-slate-900">Pushy descriptions</h3>
+            <p class="text-sm text-slate-600">The YAML <code class="text-pink-600 bg-pink-50 px-1 rounded">description</code> is the trigger. Enumerate scenarios and phrasings; don't just state what the skill does.</p>
+          </div>
+          <div class="rounded-xl border border-slate-200 p-6 bg-white">
+            <h3 class="font-semibold mb-2 text-slate-900">Progressive disclosure</h3>
+            <p class="text-sm text-slate-600">Keep <code class="text-pink-600 bg-pink-50 px-1 rounded">SKILL.md</code> under ~500 lines. Push detail into <code class="text-pink-600 bg-pink-50 px-1 rounded">references/</code> so the model only reads it when needed.</p>
+          </div>
+          <div class="rounded-xl border border-slate-200 p-6 bg-white">
+            <h3 class="font-semibold mb-2 text-slate-900">One skill = one folder</h3>
+            <p class="text-sm text-slate-600"><code class="text-pink-600 bg-pink-50 px-1 rounded">SKILL.md</code> + optional <code class="text-pink-600 bg-pink-50 px-1 rounded">references/</code>, <code class="text-pink-600 bg-pink-50 px-1 rounded">scripts/</code>, <code class="text-pink-600 bg-pink-50 px-1 rounded">assets/</code>, <code class="text-pink-600 bg-pink-50 px-1 rounded">evals/</code>.</p>
+          </div>
+          <div class="rounded-xl border border-slate-200 p-6 bg-white">
+            <h3 class="font-semibold mb-2 text-slate-900">Methodology, not project rules</h3>
+            <p class="text-sm text-slate-600">Skills capture <em>how</em> we like to work, so they apply across any codebase. Project-specific bits stay tagged in the description.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- footer -->
+      <footer class="border-t border-slate-200 bg-white">
+        <div class="max-w-5xl mx-auto px-6 lg:px-12 py-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-sm text-slate-500">
+          <div>
+            Built by <a class="text-slate-900 font-medium hover:underline" href="https://github.com/M2LabOrg">M2Lab.io</a>
+          </div>
+          <div id="updated"></div>
+          <div class="flex gap-4">
+            <a href="https://github.com/M2LabOrg/agent-skills" class="hover:text-slate-900">Repo</a>
+            <a href="https://code.claude.com/docs/en/skills" class="hover:text-slate-900">Anthropic skills docs</a>
+          </div>
+        </div>
+      </footer>
+
+    </main>
+  </div>
+
+  <script id="skills-data" type="application/json">
+[
+  {
+    "name": "debugging-discipline",
+    "scope": "generic",
+    "tone": "indigo",
+    "description": "Michel's bug-fixing methodology — root cause first, minimal upstream fix, no over-engineering. Use whenever the user reports a bug, asks to investigate a failure, says something is broken / not working / unexpected, a..."
+  },
+  {
+    "name": "pr-and-branch-hygiene",
+    "scope": "generic",
+    "tone": "emerald",
+    "description": "Michel's standards for branch naming, commit discipline, and pull-request authoring across all projects. Use whenever the user creates a branch, opens or updates a pull request, prepares a commit, drafts a PR descript..."
+  },
+  {
+    "name": "research-and-report",
+    "scope": "generic",
+    "tone": "pink",
+    "description": "Michel's standard format for investigations, comparisons, benchmarks, experiments, and any \"go look into X and tell me what you find\" task. Use whenever the user asks to investigate, compare, evaluate, benchmark, an..."
+  },
+  {
+    "name": "spec-before-code",
+    "scope": "generic",
+    "tone": "amber",
+    "description": "Michel's lightweight design-doc workflow — write a markdown spec under `specs/` before implementing any non-trivial feature, including a threat model. Use whenever the user proposes a new feature, a non-trivial refact..."
+  },
+  {
+    "name": "mermaid-diagrams",
+    "scope": "generic",
+    "tone": "sky",
+    "description": "Always prefer Mermaid diagrams over ASCII art in markdown documents (READMEs, specs, ADRs, PR descriptions, reports). Use whenever the user asks for a diagram, flow, architecture sketch, sequence, state machine, ER di..."
+  },
+  {
+    "name": "github-pages-generation",
+    "scope": "generic",
+    "tone": "violet",
+    "description": "Michel's methodology for spinning up a beautiful, low-maintenance GitHub Pages site for a repository — static HTML + TailwindCSS CDN by default, Jekyll only when needed. Use whenever the user asks to \"create GitHub P..."
+  },
+  {
+    "name": "docs-sync-on-change",
+    "scope": "generic",
+    "tone": "fuchsia",
+    "description": "Whenever code, configuration, or content in a repository changes, also update the corresponding documentation surfaces — README, GitHub Pages site (`/docs/`), wiki, CHANGELOG, and any embedded examples — in the same c..."
+  },
+  {
+    "name": "eval-development",
+    "scope": "generic",
+    "tone": "rose",
+    "description": "Michel's personal methodology for eval-driven development of AI translation (and similar AI service) fixes in <your AI services project>. Use whenever the user asks to \"build an eval\", \"set up an eval\", \"write an..."
+  },
+  {
+    "name": "local-git-excludes",
+    "scope": "generic",
+    "tone": "indigo",
+    "description": "Use `.git/info/exclude` (per-clone, never pushed) or a global gitignore for personal / machine-local files instead of polluting the team `.gitignore`. Use whenever the user wants to ignore a file privately, asks \"wil..."
+  }
+]
+
+  </script>
+
+  <script>
+    const tones = {
+      indigo:  ["bg-indigo-50",  "text-indigo-700",  "ring-indigo-200"],
+      emerald: ["bg-emerald-50", "text-emerald-700", "ring-emerald-200"],
+      pink:    ["bg-pink-50",    "text-pink-700",    "ring-pink-200"],
+      amber:   ["bg-amber-50",   "text-amber-800",   "ring-amber-200"],
+      sky:     ["bg-sky-50",     "text-sky-700",     "ring-sky-200"],
+      violet:  ["bg-violet-50",  "text-violet-700",  "ring-violet-200"],
+      fuchsia: ["bg-fuchsia-50", "text-fuchsia-700", "ring-fuchsia-200"],
+      rose:    ["bg-rose-50",    "text-rose-700",    "ring-rose-200"]
+    };
+    const data = JSON.parse(document.getElementById('skills-data').textContent);
+    const repoBase = 'https://github.com/M2LabOrg/agent-skills/blob/main';
+
+    // grid + filter
+    const grid = document.getElementById('grid');
+    const countEl = document.getElementById('count');
+    const emptyEl = document.getElementById('empty');
+    const searchEl = document.getElementById('search');
+    const filtersEl = document.getElementById('filters');
+
+    const scopes = ['all', ...Array.from(new Set(data.map(s => s.scope)))];
+    let activeScope = 'all';
+    let query = '';
+
+    function renderFilters() {
+      filtersEl.innerHTML = scopes.map(sc => {
+        const isActive = sc === activeScope;
+        return `<button data-scope="${sc}" class="filter-chip px-3 py-1.5 text-xs rounded-full border transition ${isActive ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-300 hover:border-slate-400'}">${sc}</button>`;
+      }).join('');
+      filtersEl.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+        activeScope = b.dataset.scope;
+        renderFilters();
+        renderGrid();
+      }));
+    }
+
+    function renderGrid() {
+      const q = query.trim().toLowerCase();
+      const filtered = data.filter(s => {
+        const scopeOk = activeScope === 'all' || s.scope === activeScope;
+        const text = `${s.name} ${s.scope} ${s.description}`.toLowerCase();
+        const queryOk = !q || text.includes(q);
+        return scopeOk && queryOk;
+      });
+      countEl.textContent = `${filtered.length} of ${data.length} skills`;
+      emptyEl.classList.toggle('hidden', filtered.length !== 0);
+      grid.innerHTML = filtered.map(s => {
+        const [bg, fg, ring] = tones[s.tone] || tones.indigo;
+        return `
+          <a id="card-${s.name}" href="${repoBase}/${s.name}/SKILL.md"
+             class="card-glow block rounded-xl border border-slate-200 bg-white p-6">
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 text-xs rounded-full ring-1 ${bg} ${fg} ${ring}">${s.scope}</span>
+              <span class="text-slate-400 text-xs">SKILL.md →</span>
+            </div>
+            <h3 class="font-semibold text-base mb-2 mono text-slate-900">${s.name}</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">${s.description}</p>
+          </a>`;
+      }).join('');
+    }
+
+    searchEl.addEventListener('input', e => { query = e.target.value; renderGrid(); });
+    // "/" focuses search
+    document.addEventListener('keydown', e => {
+      if (e.key === '/' && document.activeElement !== searchEl) {
+        e.preventDefault(); searchEl.focus();
+      } else if (e.key === 'Escape' && document.activeElement === searchEl) {
+        searchEl.value = ''; query = ''; renderGrid();
+      }
+    });
+
+    renderFilters();
+    renderGrid();
+
+    // sidebar skill links
+    document.getElementById('sidebar-skills').innerHTML = data.map(s =>
+      `<li><a class="block px-3 py-1.5 rounded-md text-slate-600 hover:bg-slate-100 hover:text-slate-900 mono text-[13px]" href="#card-${s.name}">${s.name}</a></li>`
+    ).join('');
+
+    // updated timestamp
+    document.getElementById('updated').textContent =
+      'Last updated ' + new Date(document.lastModified).toISOString().slice(0,10);
+
+    // mobile sidebar toggle
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('backdrop');
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      sidebar.classList.remove('-translate-x-full');
+      backdrop.classList.remove('hidden');
+    });
+    backdrop.addEventListener('click', () => {
+      sidebar.classList.add('-translate-x-full');
+      backdrop.classList.add('hidden');
+    });
+    // close on link click (mobile)
+    sidebar.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+      if (window.innerWidth < 1024) {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }));
+  </script>
+</body>
+</html>
