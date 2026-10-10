@@ -2,7 +2,7 @@
   "name": "m2lab-skills",
   "displayName": "M2Lab.io Agent Skills",
   "version": "1.0.0",
-  "description": "Engineering methodology skills: debugging, PR hygiene, design specs, research reports, eval-driven development, Mermaid diagrams, docs sync, and statistically sound skill evaluation.",
+  "description": "Engineering methodology skills: debugging, PR hygiene, design specs, research reports, eval-driven development, Mermaid diagrams, docs sync, skill authoring, and statistically sound skill evaluation.",
   "author": {
     "name": "M2Lab.io",
     "url": "https://github.com/M2LabOrg"
