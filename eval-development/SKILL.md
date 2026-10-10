@@ -1,244 +1,115 @@
 ---
 name: eval-development
-description: Michel's personal methodology for eval-driven development of AI translation (and similar AI service) fixes in <your AI services project>. Use whenever the user asks to "build an eval", "set up an eval", "write an eval suite", "evaluate translation quality across models", iterate on translation/post-processing fixes with measurable results, or work on PBIs that follow the same eval-first pattern (e.g., gender consistency, title consistency, dictionary enforcement, citation formatting). Encodes folder layout, Docker requirement, model coverage, status taxonomy, reporting format, and deployment loop.
+description: Eval-driven development for quality fixes in AI-powered services (LLM features, translation, summarization, extraction, classification) — write the eval first, cover every model or strategy users can select, classify outputs with an explicit status taxonomy, and iterate until the eval passes. Use when asked to build, set up, or extend an eval suite, to fix an AI output-quality issue with measurable results, or to compare models or prompt strategies on a quality criterion. Do not use for evaluating agent skills themselves (use skill-eval-statistics) or for ordinary unit tests of deterministic code.
+metadata:
+  category: evaluation
 ---
 
-# Eval Development Skill (Michel — Local)
+# Eval-Driven Development
 
-This skill captures **Michel's standard methodology** for eval-driven development on the `<your AI services project>` repo. Reference: PBI #443029 (Cross-paragraph gender consistency — post-processing for non-prompt-injectable models).
+For AI output-quality work, the eval is the specification. Write it before (or alongside) the fix, and let it decide when the fix is done.
 
-Apply it whenever building or extending an evaluation suite for AI translation or similar AI service quality fixes — even when the *subject* of the eval differs (gender, titles, dictionary, citations, punctuation, etc.). Methodology stays the same; the test cases and pass criteria adapt.
+## 1. Principles
 
----
+- **Eval first.** Encode the failure as test cases before changing prompts or code. Re-run the full eval after every change.
+- **Iterate locally.** Run evals against a local or dedicated dev environment. Use shared environments only for final validation.
+- **Cover what users can select.** An eval is not done until it covers every model, provider, or strategy a user can choose for the capability. Failure patterns differ between them.
+- **Use an explicit status taxonomy, not just pass/fail** (section 4). Acceptable-but-not-ideal outputs are first-class results.
+- **Reproducible reports.** Every run regenerates a report that is committed with the change.
+- **Agree the target in advance**, for example 100% acceptable across all models before requesting human review.
 
-## 1. Core Principles
+## 2. Folder layout
 
-- **Eval-first**: Write the eval before (or alongside) the fix. Every code change is validated by re-running the eval suite locally before pushing.
-- **Local Docker required**: All eval runs go through the local Docker Compose stack (`docker compose up`) hitting the API container at `http://localhost:3000`. Never iterate against DEV/STG/PRD for development — only for final validation.
-- **Cover all relevant models**: An eval is not done until it tests **every model the user can pick in the UI** for that capability.
-- **Three-status taxonomy**: `PASS` / `PASS_NEUTRAL` / `FAIL` — never just pass/fail. Neutral outputs (gender-neutral phrasing, ambiguous-but-acceptable translations) are first-class.
-- **Reproducible report**: Every run regenerates a markdown report committed to the branch. The PBI gets a posted summary.
-- **Target**: 100% pass rate (PASS + PASS_NEUTRAL) across all models before requesting language-team validation.
-
----
-
-## 2. Required Setup Before Running an Eval
-
-```bash
-# 1. AWS SSO (Secrets Manager + S3 access from inside the API container)
-aws sso login
-
-# 2. Bring the local stack up
-docker compose up -d
-
-# 3. Verify AWS creds reached the API container (see retrieved memory)
-docker compose exec api sh -c "wget -qO- 'http://localhost:3000/health?checkAws=true'"
-# Expect: {"aws":{"ok":true,"account":"788797614830"}}
-```
-
-If the user has changed `containers/inference/python/...`, they must:
-
-```bash
-# Rebuild only the inference image (fast iteration)
-docker compose up -d --build inference
-```
-
-For changes to `layers/text_lib/src/text_lib/translation.py`, also sync the container copy:
-
-```bash
-cp layers/text_lib/src/text_lib/translation.py \
-   containers/inference/python/text_lib/translation.py
-```
-
-(Keep the two `translation.py` copies in sync — see retrieved memory `f529f4dc`.)
-
----
-
-## 3. Folder Layout for a New Eval
-
-Create everything under `scripts/<eval-name>/` (kebab-case, descriptive):
+One folder per eval, named for the behavior under test:
 
 ```
-scripts/<eval-name>/
-├── README.md                 # What this eval tests, how to run, current results
-├── eval_<topic>.py           # The eval driver (Python 3, stdlib + requests only when possible)
-├── test_cases.json           # Or inline in the .py — list of {id, source, lang_pair, expected_keywords, ...}
-├── eval_report.md            # Auto-generated detailed per-test/per-model report
-├── EVAL_RESULTS.md           # Human-curated summary + failure analysis (committed)
-└── data/                     # Optional: raw JSON dumps from individual runs (gitignored if huge)
+evals/<eval-name>/
+├── README.md          # What this eval tests, how to run it, latest results
+├── run_eval.py        # Driver, from assets/run_eval_template.py
+├── cases.json         # Test cases: id, input, expected / acceptable / wrong markers
+├── report.md          # Auto-generated per-case, per-model report
+├── RESULTS.md         # Human-written summary, from assets/results-template.md
+└── data/              # Optional raw outputs per run (gitignore if large)
 ```
 
-Match the pattern from `scripts/cross-paragraph-gender/` (PBI #443029) and `scripts/title-subtitle-consistency/`.
+Use the project's existing convention (`scripts/`, `tests/evals/`, …) if it has one.
 
----
-
-## 4. Recommended Test Coverage
+## 3. Test coverage
 
 | Dimension | Default | Rationale |
 |---|---|---|
-| **Test cases** | **10 minimum** | Enough variety, fast enough to run in <2 min |
-| **Models** | **All UI-selectable for the capability** | E.g. for translation: `text-translation-t21a`, `text-translation-t21d`, `openai-translate`, `anthropic-translate`, `aws-translate`, `azure-translator`, `google-translate` (7 models) |
-| **Languages** | At minimum the language(s) named in the PBI; for cross-language fixes, cover **PT, ES, DE, RU** | These four cover gendered Romance + Germanic + Slavic |
-| **Edge cases** | Always include: multi-person articles, female subjects, male subjects, gender-neutral source | Failure patterns differ by polarity |
-| **Total requests** | ~70 (10 × 7) for single-language; ~280 for 4-language | Small enough to run locally, big enough to be statistically meaningful |
+| Cases | Start with 10–20 varied cases | Enough variety to expose patterns; fast enough to run every iteration |
+| Models / strategies | All user-selectable ones | Each fails differently |
+| Inputs | Every language, format, or domain named in the issue; add one contrasting variant | Fixes for one variant often break another |
+| Edge cases | Both polarities of the property, ambiguous inputs, multi-entity inputs | Failures cluster at boundaries |
 
-For non-translation evals (e.g., punctuation, citation, title): keep 10 cases × N strategies and adapt the model list.
+Small case counts are for fast iteration, not for claims. Before stating that one model or fix is *better*, check the sample size with the `skill-eval-statistics` skill (`scripts/skillstats.py compare` and `ci`). Ten cases per model can show that something is broken, not that a fix is a few points better.
 
----
+## 4. Status taxonomy
 
-## 5. Status Taxonomy (Use Exactly These)
+Define statuses that match the property being tested. A three-level scale works for most quality issues:
 
-| Status | Meaning | Example |
+| Status | Meaning | Example (gender agreement in translation) |
 |---|---|---|
-| `PASS` | Output contains the **correct gendered/expected** form | `Nascida` for a female subject |
-| `PASS_NEUTRAL` | Output is **acceptable gender-neutral / ambiguous** form | `Nasceu` (no gender marker) |
-| `FAIL` | Output contains the **wrong** form | `Nascido` for a female subject |
+| `PASS` | Output has the expected form | Feminine form for a female subject |
+| `PASS_NEUTRAL` | Output is acceptable but avoids the property | Gender-neutral phrasing |
+| `FAIL` | Output has a wrong form | Masculine form for a female subject |
 
-Pass rate = `(PASS + PASS_NEUTRAL) / total`. Target = **100%**.
+Report `PASS`, `PASS_NEUTRAL` and `FAIL` separately, and define the headline rate explicitly (for example `(PASS + PASS_NEUTRAL) / total`). A rising neutral share can hide a model that has stopped attempting the task.
 
----
+## 5. Eval driver
 
-## 6. Eval Driver Skeleton
+Start from [assets/run_eval_template.py](assets/run_eval_template.py). The driver should:
 
-The driver should:
+1. Accept arguments to select models, cases, environment, and output path.
+2. Send each case to the service through the same interface users hit.
+3. Classify each output deterministically where possible (expected, acceptable and wrong markers per case). Use an LLM judge only where code cannot decide, and calibrate it against human labels first.
+4. Print a summary table and write `report.md` with a model × status table and per-case output snippets.
+5. Exit non-zero when the agreed target is not met, so the eval can gate CI.
+6. Optionally write one JSON line per case and run (`{"query", "variant", "pass"}`) so `skill-eval-statistics` can analyze it.
 
-1. Accept CLI args: `--models`, `--tests`, `--out` (default `eval_report.md`).
-2. POST each test to `http://localhost:3000` (the standard sync endpoint, e.g. `/api/v1/text/text-translation` for translation), with SigV4 disabled (local stack).
-3. For each result, classify by **keyword inspection** of the translated output (`PASS` / `PASS_NEUTRAL` / `FAIL`) using a per-test list of `expected_keywords`, `neutral_keywords`, `wrong_keywords`.
-4. Print a colored table to stdout AND write `eval_report.md` with:
-   - Summary table (model × pass rate)
-   - Per-test breakdown showing the actual translated snippet for each gendered/expected term
-5. Exit non-zero if pass rate < 100% (so it can gate CI later).
+## 6. Results summary (`RESULTS.md`)
 
-Reference implementation: `scripts/cross-paragraph-gender/eval_gender.py`.
+Copy [assets/results-template.md](assets/results-template.md). Report every rate as `k/n` with an interval, list failure patterns by model with case ids, and explain every remaining failure.
 
----
+Post the summary table on the linked issue or work item, and link to the committed report.
 
-## 7. Report Template (`EVAL_RESULTS.md`)
+## 7. Iteration loop
 
-```markdown
-# <PBI Title> — Eval Results
-
-**PBI:** #<id>  **Branch:** mdsm/<branch>  **Date:** <YYYY-MM-DD>
-**Stack:** local Docker Compose, inference container `<version>`
-
-## Summary
-
-| Model | Pass | Neutral | Fail | Rate |
-|---|---:|---:|---:|---:|
-| text-translation-t21a | 10 | 0 | 0 | **100% ✅** |
-| ... |
-
-## Failure Patterns
-- **<model>**: <pattern>
-- ...
-
-## Fix Strategy
-- **Prompt-injectable models** (t21a, t21d, openai, anthropic): entity-context pre-pass + prompt injection
-- **Non-prompt-injectable models** (aws, azure, google): post-processing enforcement (`enforce_*_consistency()` pattern, see PBI #411440)
-
-## Next Steps
-1. ...
+```mermaid
+flowchart LR
+    A[Change prompt or code] --> B[Rebuild / restart service]
+    B --> C[Run eval]
+    C --> D{Target met?}
+    D -- no --> E[Inspect failures by model and case]
+    E --> A
+    D -- yes --> F[Commit report + RESULTS.md]
 ```
 
-Also post a condensed HTML version of this table as a PBI comment via `System.History` — see retrieved memory `165691c8`.
+Commit the regenerated report with each meaningful change, so the history shows which change moved which results.
 
----
+## 8. Two-layer fix pattern
 
-## 8. Iteration Loop
+When failures span several models, and some of them cannot be steered by prompts (for example, fixed-API translation services), fix in two layers:
 
-```text
-edit code  →  rebuild inference container  →  run eval  →  inspect failures
-            ↑                                                          │
-            └──────────────────  refine fix  ←─────────────────────────┘
-```
+1. **Steering layer** (models that accept instructions): extract the needed context in a pre-pass and inject it into the prompt.
+2. **Deterministic post-processing** (all models): a function that enforces the property on the output as a safety net. Call it on every code path that returns output, and unit-test it on its own.
 
-Concretely each round:
+The post-processing layer is what makes non-steerable models pass, and it keeps steerable ones from regressing silently.
 
-```bash
-# 1. Rebuild after code change
-docker compose up -d --build inference
+## 9. Before opening the pull request
 
-# 2. Run eval
-python3 scripts/<eval-name>/eval_<topic>.py
+- [ ] Lint, format and unit tests pass
+- [ ] The full eval was re-run on the final code, and the report is committed
+- [ ] `RESULTS.md` explains every remaining failure
+- [ ] Results claims include sample sizes and intervals
+- [ ] Version bumps or deployment config changes the project requires are done
 
-# 3. Inspect new eval_report.md, commit when better
-git add scripts/<eval-name>/eval_report.md scripts/<eval-name>/EVAL_RESULTS.md
-git commit -m "<eval-name>: results after <change>"
-```
+After merging, re-run the eval against each environment as the change is promoted, and update the issue with the results.
 
----
+## Anti-patterns
 
-## 9. Two-Layer Fix Pattern (Translation Quality PBIs)
-
-When the eval shows multi-model failures, prefer this proven pattern (PBIs #411440, #422337, #435102, #443029):
-
-1. **Layer 1 — Prompt injection** (only models that accept system context):
-   - Add an entity-extraction pre-pass in the sync handler (`containers/inference/python/sync_handlers/text_translation.py`)
-   - Inject extracted context into the translation prompt builders in `translation.py`
-2. **Layer 2 — Deterministic post-processing** (ALL models — safety net):
-   - Add an `enforce_<topic>_consistency()` function in `containers/inference/python/text_lib/translation.py`
-   - Call it from both sync and async paths
-   - Mirror the change in `layers/text_lib/src/text_lib/translation.py` (keep copies in sync)
-
----
-
-## 10. Pre-Push Checklist
-
-Before opening / updating the PR:
-
-```bash
-# Lint + format
-python -m manage checks --fix
-
-# Bump versions if you touched containers/layers (see retrieved memory 27fe9a3b)
-#   containers/inference/container.toml  → bump version
-#   layers/text_lib/layer.toml            → bump version (if layer touched)
-
-# Re-run eval one final time
-python3 scripts/<eval-name>/eval_<topic>.py
-
-# Commit eval artifacts
-git add scripts/<eval-name>/
-```
-
----
-
-## 11. Deployment Loop (after PR merge)
-
-```bash
-# DEV
-python -m manage push_container inference -p tma_ai_dev
-python3 scripts/<eval-name>/eval_<topic>.py --env dev   # validate against DEV API
-
-# Request language-team validation (Portuguese / Spanish / etc.)
-
-# STG → PRD after sign-off (CDK pipeline or manage push)
-```
-
-Update PBI with HTML-formatted results table per `System.History` after each environment.
-
----
-
-## 12. Branch + PR Conventions (User Rules)
-
-- Branch: `mdsm/<short-descriptive-name>` (per global rule)
-- Target branch: **`main`** (never `master`)
-- PR description: link the PBI, paste the eval summary table, list the 7 models tested
-
----
-
-## Quick Reference Card
-
-| Thing | Value |
-|---|---|
-| Local API URL | `http://localhost:3000` |
-| Stack up | `docker compose up -d` |
-| Rebuild inference | `docker compose up -d --build inference` |
-| Run eval | `python3 scripts/<eval-name>/eval_*.py` |
-| Min test cases | 10 |
-| Translation models | 7 (t21a, t21d, openai, anthropic, aws, azure, google) |
-| Statuses | PASS / PASS_NEUTRAL / FAIL |
-| Target pass rate | 100% |
-| Reference PBI | #443029 |
-| Reference scripts | `scripts/cross-paragraph-gender/`, `scripts/title-subtitle-consistency/` |
+- Tuning prompts against the same few cases you report on: hold some cases back.
+- Reporting one blended pass rate across models: it hides the one that fails.
+- Declaring victory on a small improvement without checking whether the sample can show it.
+- Classifying outputs by eyeballing instead of by recorded criteria.

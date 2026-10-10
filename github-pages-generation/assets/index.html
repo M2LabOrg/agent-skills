@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>REPO NAME</title>
+  <meta name="description" content="ONE-LINE DESCRIPTION" />
+  <meta property="og:title" content="REPO NAME" />
+  <meta property="og:description" content="ONE-LINE DESCRIPTION" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://OWNER.github.io/REPO/" />
+  <meta property="og:image" content="https://OWNER.github.io/REPO/assets/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <style>
+    :root {
+      --bg: #f8fafc; --surface: #ffffff; --text: #0f172a; --muted: #475569;
+      --border: #e2e8f0; --accent: #4f46e5; --code-bg: #0f172a; --code-text: #e2e8f0;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b1120; --surface: #111827; --text: #e5e7eb; --muted: #9ca3af;
+        --border: #1f2937; --accent: #818cf8; --code-bg: #020617; --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    main, header, footer { max-width: 64rem; margin: 0 auto; padding: 0 1rem; }
+    header { padding-top: 4rem; padding-bottom: 3rem; }
+    h1 { font-size: clamp(2rem, 6vw, 3.25rem); line-height: 1.1; margin: 0 0 1rem; }
+    .lead { color: var(--muted); font-size: 1.15rem; max-width: 40rem; }
+    .cta { display: inline-block; margin-top: 1.5rem; padding: .7rem 1.2rem; border-radius: .5rem; background: var(--accent); color: #fff; text-decoration: none; font-weight: 600; }
+    h2 { margin-top: 3rem; }
+    pre { background: var(--code-bg); color: var(--code-text); padding: 1rem; border-radius: .5rem; overflow-x: auto; }
+    input[type=search] { width: 100%; padding: .65rem .9rem; border: 1px solid var(--border); border-radius: .5rem; background: var(--surface); color: var(--text); font: inherit; }
+    .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr)); margin-top: 1rem; }
+    .card { display: block; padding: 1.25rem; border: 1px solid var(--border); border-radius: .75rem; background: var(--surface); color: inherit; text-decoration: none; }
+    .card:hover { border-color: var(--accent); }
+    .card h3 { margin: .25rem 0 .5rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1rem; }
+    .card p { margin: 0; color: var(--muted); font-size: .95rem; }
+    .tag { font-size: .75rem; color: var(--accent); text-transform: uppercase; letter-spacing: .05em; }
+    footer { margin-top: 4rem; padding-top: 2rem; padding-bottom: 2rem; border-top: 1px solid var(--border); color: var(--muted); font-size: .9rem; display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; }
+    footer a { color: inherit; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>REPO NAME</h1>
+    <p class="lead">ONE-SENTENCE PURPOSE.</p>
+    <a class="cta" href="https://github.com/OWNER/REPO">View on GitHub</a>
+  </header>
+
+  <main>
+    <h2 id="use">How to use</h2>
+    <pre><code>INSTALL OR USAGE COMMAND</code></pre>
+
+    <h2 id="items">Contents</h2>
+    <input id="search" type="search" placeholder="Search…" aria-label="Search items" />
+    <div id="grid" class="grid"></div>
+  </main>
+
+  <footer>
+    <span>Built by <a href="https://github.com/OWNER">OWNER</a> · LICENSE</span>
+    <span id="updated"></span>
+  </footer>
+
+  <!-- Single source of truth for the grid. Regenerate this block with a script rather than editing by hand. -->
+  <script id="items" type="application/json">
+  [
+    { "name": "example-item", "category": "category", "description": "One-line description.", "href": "https://github.com/OWNER/REPO/tree/main/example-item" }
+  ]
+  </script>
+
+  <script>
+    const items = JSON.parse(document.getElementById('items').textContent);
+    const grid = document.getElementById('grid');
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    function render(q = '') {
+      const needle = q.trim().toLowerCase();
+      grid.innerHTML = items
+        .filter(i => !needle || `${i.name} ${i.category} ${i.description}`.toLowerCase().includes(needle))
+        .map(i => `<a class="card" href="${esc(i.href)}"><span class="tag">${esc(i.category)}</span><h3>${esc(i.name)}</h3><p>${esc(i.description)}</p></a>`)
+        .join('');
+    }
+    document.getElementById('search').addEventListener('input', e => render(e.target.value));
+    render();
+    document.getElementById('updated').textContent = 'Last updated ' + new Date(document.lastModified).toISOString().slice(0, 10);
+  </script>
+</body>
+</html>

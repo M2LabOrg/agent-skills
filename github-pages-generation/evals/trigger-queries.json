@@ -1,0 +1,34 @@
+[
+  {
+    "query": "make a landing page for this repo",
+    "should_trigger": true
+  },
+  {
+    "query": "I want a nice website listing all the packages in this monorepo, hosted on GitHub",
+    "should_trigger": true
+  },
+  {
+    "query": "enable Pages on /docs and give it a proper design",
+    "should_trigger": true
+  },
+  {
+    "query": "publish our docs folder somewhere people can browse it",
+    "should_trigger": true
+  },
+  {
+    "query": "Build the React front-end for our customer portal",
+    "should_trigger": false
+  },
+  {
+    "query": "Deploy this Next.js app to Vercel",
+    "should_trigger": false
+  },
+  {
+    "query": "fix a broken link in our existing MkDocs site",
+    "should_trigger": false
+  },
+  {
+    "query": "Write the README for this project",
+    "should_trigger": false
+  }
+]

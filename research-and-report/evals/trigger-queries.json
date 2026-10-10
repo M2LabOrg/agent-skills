@@ -1,0 +1,34 @@
+[
+  {
+    "query": "Is Redis or Memcached better for our session cache? Look into it",
+    "should_trigger": true
+  },
+  {
+    "query": "benchmark the three embedding models on our search queries and tell me which to use",
+    "should_trigger": true
+  },
+  {
+    "query": "what's the impact of turning on HTTP/2 for our API latency?",
+    "should_trigger": true
+  },
+  {
+    "query": "investigate whether the new tokenizer actually reduces our prompt costs",
+    "should_trigger": true
+  },
+  {
+    "query": "What version of Node does this project use?",
+    "should_trigger": false
+  },
+  {
+    "query": "The login page crashes on Safari, investigate",
+    "should_trigger": false
+  },
+  {
+    "query": "Write a design doc for the new notifications service",
+    "should_trigger": false
+  },
+  {
+    "query": "Summarize this article for me",
+    "should_trigger": false
+  }
+]

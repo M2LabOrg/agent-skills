@@ -1,0 +1,38 @@
+[
+  {
+    "query": "open a PR for this",
+    "should_trigger": true
+  },
+  {
+    "query": "I'm done with the fix, let's get it reviewed",
+    "should_trigger": true
+  },
+  {
+    "query": "write the description for my pull request",
+    "should_trigger": true
+  },
+  {
+    "query": "reviewers left 12 comments, help me work through them",
+    "should_trigger": true
+  },
+  {
+    "query": "commit these changes",
+    "should_trigger": true
+  },
+  {
+    "query": "I have a merge conflict in package-lock.json, help",
+    "should_trigger": false
+  },
+  {
+    "query": "Should our team use trunk-based development or GitFlow?",
+    "should_trigger": false
+  },
+  {
+    "query": "I lost a commit after a reset --hard, can I get it back?",
+    "should_trigger": false
+  },
+  {
+    "query": "Explain what git rebase does",
+    "should_trigger": false
+  }
+]

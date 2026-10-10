@@ -1,103 +1,68 @@
 ---
 name: pr-and-branch-hygiene
-description: Michel's standards for branch naming, commit discipline, and pull-request authoring across all projects. Use whenever the user creates a branch, opens or updates a pull request, prepares a commit, drafts a PR description, or asks how to organize work for review. Triggers on phrases like "open a PR", "push the branch", "create a commit", "draft PR description", "ready for review", "merge this", and on any work involving Azure DevOps PBIs / GitHub issues that will land via PR.
+description: Branch naming, atomic commits, pre-push checks, and pull-request authoring that make changes easy to review and revert. Use when creating a branch, preparing commits, pushing, opening or updating a pull request (GitHub, GitLab, Azure DevOps, or any host), drafting a PR description, or responding to review comments. Do not use for git troubleshooting (merge conflicts, lost commits, rebasing problems) or for choosing a repository-wide branching strategy.
+metadata:
+  category: git
 ---
 
 # Pull Request and Branch Hygiene
 
-Apply consistently for every change that ships through a PR — Azure DevOps (`Azure DevOps`), GitHub (personal `M2LabOrg/*`), or any other host.
+Apply to every change that ships through a pull request, on any host.
 
-## 1. Branch Naming
-
-- **Always** start from a fresh `main`. Never branch off `master` (it's stale or absent on most of Michel's repos).
-- Format: `mdsm/<short-kebab-case-summary>`
-- Tie to a tracked work item when one exists: `mdsm/<id>-<summary>` is also fine (e.g. `mdsm/443029-cross-paragraph-gender`).
+## 1. Branch from a fresh default branch
 
 ```bash
-git checkout main && git pull
-git checkout -b mdsm/<descriptive-name>
+git switch main && git pull
+git switch -c <prefix>/<short-kebab-summary>
 ```
 
-## 2. Commit Discipline
+- Use the repository's default branch (often `main`). Check it with `git remote show origin | grep 'HEAD branch'`.
+- `<prefix>` follows the project's convention: author initials, or a type such as `feat`, `fix`, `chore`. Follow `CONTRIBUTING.md` if it defines one.
+- Include the work-item id when one exists: `fix/1234-null-total-on-empty-cart`.
 
-- **Atomic commits.** One logical change per commit. Easier to revert, easier to review.
-- **Imperative subject**, max ~72 chars: `"Fix gender enforcement for AWS Translate"` not `"Fixed bug"`.
-- **Body when non-trivial**: explain *why*, not *what*. The diff shows what.
-- Keep refactors and behavior changes in **separate commits**. Reviewers can ignore the refactor and focus on the behavior diff.
-- Never `--force` push a branch under review without coordinating. Use `--force-with-lease` if you must.
+## 2. Commit discipline
 
-## 3. Pre-Push Checklist
+- **Atomic commits:** one logical change each, easy to review and revert.
+- **Imperative subject** under ~72 characters: `Fix total when cart is empty`, not `Fixed bug`.
+- **Body explains why**; the diff shows what.
+- **Separate refactors from behavior changes**, so reviewers can skim the first and focus on the second.
+- Never force-push a branch under review without telling reviewers. If you must, use `--force-with-lease`.
 
-Run before every `git push`:
+## 3. Before every push
 
-- Lint + format (project-specific; e.g. `python -m manage checks --fix` for `<your AI services project>`)
-- Unit tests for affected area
-- For `<your AI services project>`: bump `container.toml` / `layer.toml` version if you touched containers / layers
-- Eval suite (when a relevant skill applies, e.g. `eval-development`)
-- Verify no secrets, debug prints, or commented-out blocks slipped in: `git diff --staged`
+- [ ] Lint and format with the project's tools
+- [ ] Unit tests for the affected area pass
+- [ ] Evals re-run, if the change affects AI output quality (see `eval-development`)
+- [ ] Required version bumps or generated files updated
+- [ ] `git diff --staged` reviewed for secrets, debug output, and commented-out code
 
-## 4. PR Description Template
+## 4. Write the pull request
 
-Always use this exact structure:
+Use [assets/pull-request-template.md](assets/pull-request-template.md). To make it the repository default, copy it to `.github/pull_request_template.md` (GitHub) or the host's equivalent.
 
-```markdown
-## Summary
-<2–4 sentence problem statement and approach>
+The description must stand on its own. "See ticket" is not a description.
 
-## Linked work
-- PBI: #<id>  (Azure DevOps)
-- Issue: #<id>  (GitHub)
+## 5. Open as draft, promote when ready
 
-## Changes
-- <bullet> <file or area> — <what changed>
-- ...
+- Open as **draft** until validation is filled in and CI is green.
+- **Review the diff yourself** in the host's UI before requesting review. It catches many obvious comments.
+- Request specific reviewers rather than relying on auto-assignment.
 
-## Validation
-- [ ] Unit tests pass
-- [ ] Lint/format clean
-- [ ] Local stack run (Docker) — paste eval table or summary
-- [ ] DEV deploy verified (if applicable)
+## 6. During review
 
-## Eval / Results
-<paste markdown table or summary metrics — see eval-development skill>
+- Answer every comment with a change or a reply explaining why not.
+- Push follow-ups as **new commits** so reviewers see what changed. Squash at merge time if needed.
+- Re-run validation and update the description's results after significant changes.
 
-## Risks / Rollback
-<anything reviewers should know; how to roll back if needed>
+## 7. Merge
 
-## Screenshots / Diagrams
-<if UI or architecture changed — prefer Mermaid per mermaid-diagrams skill>
-```
+- Target the default branch.
+- Prefer **squash merge**, unless the individual commits are meaningful.
+- Delete the branch after merging.
 
-## 5. PR Mode
+## Anti-patterns
 
-- **Open as Draft** until the eval/validation section is filled and CI is green. Promote to "Ready for review" only when you'd be comfortable merging it yourself.
-- Self-review the diff in the PR UI before requesting reviewers — catches roughly half of "obvious" feedback.
-- Tag reviewers explicitly. Don't rely on auto-assignment.
-
-## 6. Targeting & Merging
-
-- **Target `main`.** Never `master`.
-- Prefer **squash merge** unless commits are individually meaningful and well-crafted.
-- Delete the branch after merge.
-
-## 7. Hosts
-
-| Host | Account | URL pattern |
-|---|---|---|
-| Azure DevOps (work) | Azure DevOps org / MEPS | `https://dev.azure.com/Azure DevOps/_git/<repo>` |
-| GitHub (personal) | **M2LabOrg** | `https://github.com/M2LabOrg/<repo>` |
-
-For personal projects under `M2LabOrg`, mirror the same PR template and discipline. Use GitHub Issues in place of PBIs.
-
-## 8. Updating an Open PR
-
-- Address each review comment with either a code change *or* an inline reply explaining why not.
-- Push as **additional commits** during review (don't rebase). Squash at merge time if needed.
-- Re-run the eval / validation suite and update the PR description's results section so reviewers don't have to ask.
-
-## 9. Anti-Patterns to Avoid
-
-- "WIP" commits with broken state pushed to a PR branch under review.
-- Mega-PRs (>500 lines diff) for non-mechanical changes — split them.
-- PR descriptions that say only "see PBI". Reviewers should not have to context-switch.
-- Renaming the branch after the PR exists; create a new branch and a new PR instead.
+- "WIP" commits with broken state on a branch under review.
+- Pull requests over ~500 changed lines for non-mechanical work: split them.
+- Renaming a branch after the pull request exists.
+- Mixing formatting changes with logic changes.

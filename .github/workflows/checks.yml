@@ -1,0 +1,34 @@
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.8", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Skills are valid and the catalog is up to date
+        run: python scripts/catalog.py --check
+      - name: Script tests
+        run: python -m unittest discover tests -v
+      - name: Example data still reproduces
+        working-directory: skill-eval-statistics/examples
+        run: |
+          python make_example.py | diff - results.jsonl
+          python ../scripts/skillstats.py analyze results.jsonl
+      - name: Shell scripts parse
+        run: |
+          sh -n scripts/install.sh
+          sh -n local-git-excludes/scripts/exclude-locally.sh

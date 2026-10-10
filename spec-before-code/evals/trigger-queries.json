@@ -1,0 +1,34 @@
+[
+  {
+    "query": "Let's add multi-tenant support to the billing service",
+    "should_trigger": true
+  },
+  {
+    "query": "I want to integrate with Stripe webhooks for subscription changes",
+    "should_trigger": true
+  },
+  {
+    "query": "write an RFC for moving our job queue from cron to a message broker",
+    "should_trigger": true
+  },
+  {
+    "query": "we need a new endpoint that lets admins export all user data",
+    "should_trigger": true
+  },
+  {
+    "query": "Fix the off-by-one error in pagination",
+    "should_trigger": false
+  },
+  {
+    "query": "Rename this variable to something clearer",
+    "should_trigger": false
+  },
+  {
+    "query": "Compare three logging libraries and recommend one",
+    "should_trigger": false
+  },
+  {
+    "query": "Draw the current architecture as a diagram",
+    "should_trigger": false
+  }
+]

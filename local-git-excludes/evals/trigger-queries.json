@@ -1,0 +1,34 @@
+[
+  {
+    "query": "I symlinked my personal prompts folder into this repo, how do I stop git from showing it without telling the team?",
+    "should_trigger": true
+  },
+  {
+    "query": "add my notes.md to the gitignore",
+    "should_trigger": true
+  },
+  {
+    "query": "will my colleagues see it if I ignore my .vscode settings?",
+    "should_trigger": true
+  },
+  {
+    "query": "I keep a scratch/ folder in every project, make git ignore it everywhere",
+    "should_trigger": true
+  },
+  {
+    "query": "Add node_modules and dist to .gitignore for this new project",
+    "should_trigger": false
+  },
+  {
+    "query": "I accidentally committed a .env with secrets, how do I remove it from history?",
+    "should_trigger": false
+  },
+  {
+    "query": "Set up a .gitignore for a Python package",
+    "should_trigger": false
+  },
+  {
+    "query": "Why is git status so slow in this huge repo?",
+    "should_trigger": false
+  }
+]
