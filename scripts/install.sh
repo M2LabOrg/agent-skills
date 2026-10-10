@@ -83,7 +83,7 @@ for skill in "$@"; do
     ln -s "$src" "$dest"
   else
     cp -R "$src" "$dest"
-    rm -rf "$dest/evals" # maintainer-only trigger tests
+    find "$dest" -name __pycache__ -type d -prune -exec rm -rf {} +
   fi
   echo "installed: $dest"
 done
