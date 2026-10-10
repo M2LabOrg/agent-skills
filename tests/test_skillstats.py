@@ -85,10 +85,27 @@ class Clustered(unittest.TestCase):
             out = s.analyze(fh.name, reps=2000)
         finally:
             os.unlink(fh.name)
-        paired = out[2]
+        paired = next(line for line in out if line.startswith("paired"))
         self.assertIn("+50%", paired)
         self.assertIn("6 queries improved, 0 got worse", paired)
         self.assertIn("sign test p = 0.031", paired)
+        self.assertTrue(any(line.startswith("Warning: fewer than 15 queries") for line in out))
+
+    def test_analyze_single_run_per_query(self):
+        rows = [{"query": q, "variant": v, "pass": (q + i) % 3 != 0}
+                for q in range(20) for i, v in enumerate(("old", "new"))]
+        out = self._analyze(rows)
+        self.assertIn("1 run per query, so runs are independent", out[0])
+        self.assertNotIn("nan", " ".join(out))
+        self.assertFalse(any(line.startswith("Warning") for line in out))
+
+    def _analyze(self, rows):
+        with tempfile.NamedTemporaryFile("w", suffix=".jsonl", delete=False) as fh:
+            fh.write("\n".join(json.dumps(r) for r in rows))
+        try:
+            return s.analyze(fh.name, reps=2000)
+        finally:
+            os.unlink(fh.name)
 
 
 if __name__ == "__main__":

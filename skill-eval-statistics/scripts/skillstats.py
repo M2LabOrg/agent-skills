@@ -25,6 +25,7 @@ from collections import defaultdict
 from statistics import NormalDist
 
 _N = NormalDist()
+MIN_QUERIES = 15  # below this, query-level bootstrap intervals undercover
 
 
 # ---------------------------------------------------------------- intervals
@@ -183,12 +184,18 @@ def analyze(path, conf=0.95, reps=10000, seed=0):
         rates = [{v: sum(g) / len(g)} for g in groups]
         rate = query_mean(rates, v)
         lo, hi = cluster_bootstrap(rates, lambda s: query_mean(s, v), reps, conf, seed)
-        rho = icc_anova(groups)
         m = n_runs / len(groups)
-        n_eff = n_runs / design_effect(m, rho) if rho == rho else float("nan")
+        if all(len(g) == 1 for g in groups):
+            clustering = "1 run per query, so runs are independent"
+        else:
+            rho = icc_anova(groups)
+            clustering = (f"ICC {rho:.2f} -> worth ~{n_runs / design_effect(m, rho):.0f} independent runs"
+                          if rho == rho else "ICC not estimable")
         out.append(f"{v}: {pct(rate)} pass ({pct(conf)} CI {pct(lo)} to {pct(hi)}) | "
-                   f"{len(groups)} queries x {m:.1f} runs = {n_runs} runs | "
-                   f"ICC {rho:.2f} -> worth ~{n_eff:.0f} independent runs")
+                   f"{len(groups)} queries x {m:.1f} runs = {n_runs} runs | {clustering}")
+    if min(len(runs[v]) for v in variants) < MIN_QUERIES:
+        out.append(f"Warning: fewer than {MIN_QUERIES} queries. Bootstrap intervals are too narrow at this size; "
+                   f"treat them as optimistic, or add queries.")
 
     if len(variants) == 2:
         old, new = variants if variants[0] in ("old", "baseline", "a", "before") else variants[::-1]
@@ -207,7 +214,8 @@ def analyze(path, conf=0.95, reps=10000, seed=0):
                 if n_changed else 1.0
             out.append(f"paired {new} - {old} over {len(shared)} shared queries: {d:+.0%} "
                        f"({pct(conf)} CI {lo:+.0%} to {hi:+.0%}) | "
-                       f"{better} queries improved, {worse} got worse, sign test p = {min(1.0, 2 * tail):.3f}")
+                       f"{plural(better, 'query', 'queries')} improved, {worse} got worse, "
+                       f"sign test p = {min(1.0, 2 * tail):.3f}")
             if lo <= 0 <= hi:
                 out.append("The interval includes zero: this data cannot tell the versions apart.")
     return out
@@ -217,6 +225,10 @@ def analyze(path, conf=0.95, reps=10000, seed=0):
 
 def pct(x):
     return f"{100 * x:.0f}%"
+
+
+def plural(n, one, many):
+    return f"{n} {one if n == 1 else many}"
 
 
 def main():

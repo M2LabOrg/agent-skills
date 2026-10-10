@@ -15,16 +15,16 @@ Reusable engineering methodologies, packaged as [Agent Skills](https://agentskil
 <!-- catalog:start -->
 | Skill | Category | What it does | Bundled |
 |---|---|---|---|
-| [`debugging-discipline`](debugging-discipline/SKILL.md) | quality | Diagnostic-first bug-fixing methodology. | `references/` |
-| [`docs-sync-on-change`](docs-sync-on-change/SKILL.md) | docs | Keeps documentation in the same commit as the change it describes. | `assets/` |
-| [`eval-development`](eval-development/SKILL.md) | evaluation | Eval-driven development for quality fixes in AI-powered services (LLM features, translation, summarization, extraction, classification). | `assets/` |
-| [`github-pages-generation`](github-pages-generation/SKILL.md) | docs | Creates a polished, low-maintenance GitHub Pages site for a repository. | `assets/` |
+| [`debugging-discipline`](debugging-discipline/SKILL.md) | quality | Diagnostic-first bug-fixing methodology — reproduce precisely, find the root cause, apply the smallest upstream fix, and lock it in with a regression test. | `references/` |
+| [`docs-sync-on-change`](docs-sync-on-change/SKILL.md) | docs | Keeps documentation in the same commit as the change it describes — README, docs site, wiki, CHANGELOG, embedded examples, and skill descriptions. | `assets/` |
+| [`eval-development`](eval-development/SKILL.md) | evaluation | Eval-driven development for quality fixes in AI-powered services (LLM features, translation, summarization, extraction, classification) — write the eval first, cover every model or strategy users can select, classify outputs with an explicit status taxonomy, and iterate until the eval passes. | `assets/` |
+| [`github-pages-generation`](github-pages-generation/SKILL.md) | docs | Creates a polished, low-maintenance GitHub Pages site for a repository — static HTML in docs/ with a data-driven card grid by default, a static-site generator only when the content needs one. | `assets/` |
 | [`local-git-excludes`](local-git-excludes/SKILL.md) | git | Ignores personal or machine-local files with .git/info/exclude or a global gitignore instead of the shared, tracked .gitignore. | `scripts/` |
-| [`mermaid-diagrams`](mermaid-diagrams/SKILL.md) | docs | Draws diagrams in Markdown as Mermaid code blocks instead of ASCII art. | `references/` |
+| [`mermaid-diagrams`](mermaid-diagrams/SKILL.md) | docs | Draws diagrams in Markdown as Mermaid code blocks instead of ASCII art — flowcharts, sequence, state, ER, and class diagrams. | `references/` |
 | [`pr-and-branch-hygiene`](pr-and-branch-hygiene/SKILL.md) | git | Branch naming, atomic commits, pre-push checks, and pull-request authoring that make changes easy to review and revert. | `assets/` |
 | [`research-and-report`](research-and-report/SKILL.md) | research | Produces a self-contained, reproducible Markdown report for investigations, comparisons, benchmarks, and experiments, with the verdict first and real numbers throughout. | `assets/` |
-| [`skill-eval-statistics`](skill-eval-statistics/SKILL.md) | evaluation | Applies sound statistics when designing, running, or reporting evaluations of agent skills. | `scripts/`, `references/`, `assets/` |
-| [`spec-before-code`](spec-before-code/SKILL.md) | design | Lightweight design-doc workflow. | `assets/` |
+| [`skill-eval-statistics`](skill-eval-statistics/SKILL.md) | evaluation | Applies sound statistics when designing, running, or reporting evaluations of agent skills — trigger rates, outcome pass rates, description tuning, and before/after comparisons. | `scripts/`, `references/`, `assets/` |
+| [`spec-before-code`](spec-before-code/SKILL.md) | design | Lightweight design-doc workflow — write a short Markdown spec with goals, non-goals, design, alternatives, and a mandatory threat model before implementing non-trivial work. | `assets/` |
 <!-- catalog:end -->
 
 Every skill also ships `evals/trigger-queries.json`: starter queries that should and should not trigger it, for testing the description (see [Testing skills](#testing-skills)).

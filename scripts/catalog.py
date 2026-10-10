@@ -28,7 +28,7 @@ MAX_DESCRIPTION = 1024
 FORBIDDEN = [
     (re.compile(r"\bmdsm/"), "personal branch prefix"),
     (re.compile(r"\bPBI #\d"), "work-item id"),
-    (re.compile(r"(?<![\d.])\d{12}(?![\d.])"), "12-digit account id"),
+    (re.compile(r"(?<![\d.])\d{12}(?!\.?\d)"), "12-digit account id"),
     (re.compile(r"retrieved memory", re.I), "private memory reference"),
     (re.compile(r"Michel's", re.I), "personal attribution inside a skill"),
 ]
@@ -127,9 +127,8 @@ def validate(skill_dir):
 
 
 def short(desc):
-    """First sentence (up to the first ' — ' or '. '), for the README table."""
-    first = re.split(r"(?<=\.)\s", desc, maxsplit=1)[0]
-    return first.split(" — ")[0].rstrip(".")
+    """First sentence of the description, for the README table and docs cards."""
+    return re.split(r"(?<=\.)\s", desc, maxsplit=1)[0].rstrip(".")
 
 
 def readme_table(entries):
