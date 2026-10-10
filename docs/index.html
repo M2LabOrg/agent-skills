@@ -316,6 +316,17 @@ agent-skills/scripts/install.sh --agent copilot
     ]
   },
   {
+    "name": "skill-authoring",
+    "category": "authoring",
+    "description": "Creates and improves agent skills in the open Agent Skills format — a precise triggering description, a lean SKILL.md, and scripts/, references/, assets/ and evals/ folders used for the right purposes — then validates the result.",
+    "folders": [
+      "scripts",
+      "references",
+      "assets",
+      "evals"
+    ]
+  },
+  {
     "name": "skill-eval-statistics",
     "category": "evaluation",
     "description": "Applies sound statistics when designing, running, or reporting evaluations of agent skills — trigger rates, outcome pass rates, description tuning, and before/after comparisons.",
@@ -340,7 +351,7 @@ agent-skills/scripts/install.sh --agent copilot
 <!-- catalog:end -->
 
   <script>
-    const categoryTone = { quality: 'indigo', docs: 'sky', evaluation: 'rose', git: 'emerald', research: 'pink', design: 'amber' };
+    const categoryTone = { quality: 'indigo', docs: 'sky', evaluation: 'rose', git: 'emerald', research: 'pink', design: 'amber', authoring: 'violet' };
     const tones = {
       indigo:  ["bg-indigo-50",  "text-indigo-700",  "ring-indigo-200"],
       emerald: ["bg-emerald-50", "text-emerald-700", "ring-emerald-200"],

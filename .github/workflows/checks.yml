@@ -28,6 +28,8 @@ jobs:
         run: |
           python make_example.py | diff - results.jsonl
           python ../scripts/skillstats.py analyze results.jsonl
+      - name: Every skill passes the skill-authoring validator (strict)
+        run: python skill-authoring/scripts/validate_skill.py --strict $(dirname */SKILL.md)
       - name: Shell scripts parse
         run: |
           sh -n scripts/install.sh

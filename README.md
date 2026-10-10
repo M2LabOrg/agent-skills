@@ -1,14 +1,20 @@
 # M2Lab.io Agent Skills
 
-[![Checks](https://github.com/M2LabOrg/agent-skills/actions/workflows/checks.yml/badge.svg)](https://github.com/M2LabOrg/agent-skills/actions/workflows/checks.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Checks](https://github.com/M2LabOrg/agent-skills/actions/workflows/checks.yml/badge.svg)](https://github.com/M2LabOrg/agent-skills/actions/workflows/checks.yml) <!-- skill-count:start -->[![Skills: 11](https://img.shields.io/badge/skills-11-blue.svg)](#skills)<!-- skill-count:end -->
 [![Agent Skills format](https://img.shields.io/badge/format-Agent%20Skills-8A2BE2.svg)](https://agentskills.io)
 [![Works with any agent](https://img.shields.io/badge/agents-Claude%20Code%20%7C%20Copilot%20%7C%20Codex%20%7C%20any-0aa.svg)](#install)
+[![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-D97757.svg)](#install)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-3776AB.svg?logo=python&logoColor=white)](#how-each-skill-is-built)
+[![Dependencies: none](https://img.shields.io/badge/dependencies-none-brightgreen.svg)](#how-each-skill-is-built)
+[![Catalog site](https://img.shields.io/website?url=https%3A%2F%2Fm2laborg.github.io%2Fagent-skills%2F&label=catalog)](https://m2laborg.github.io/agent-skills/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Last commit](https://img.shields.io/github/last-commit/M2LabOrg/agent-skills.svg)](https://github.com/M2LabOrg/agent-skills/commits/main)
+[![GitHub stars](https://img.shields.io/github/stars/M2LabOrg/agent-skills.svg?style=social)](https://github.com/M2LabOrg/agent-skills/stargazers)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 > 🌐 **Browse the catalog:** <https://m2laborg.github.io/agent-skills/>
 
-Reusable engineering methodologies, packaged as [Agent Skills](https://agentskills.io): debugging, pull-request hygiene, design specs, research reports, eval-driven development, and **statistically sound skill evaluation**. Each skill is a self-contained folder with a `SKILL.md`, plus the scripts, references and templates it needs. Nothing depends on another repository or on a particular tool.
+Reusable engineering methodologies, packaged as [Agent Skills](https://agentskills.io): debugging, pull-request hygiene, design specs, research reports, eval-driven development, **skill authoring**, and **statistically sound skill evaluation**. Each skill is a self-contained folder with a `SKILL.md`, plus the scripts, references and templates it needs. Nothing depends on another repository or on a particular tool.
 
 ## Skills
 
@@ -23,6 +29,7 @@ Reusable engineering methodologies, packaged as [Agent Skills](https://agentskil
 | [`mermaid-diagrams`](mermaid-diagrams/SKILL.md) | docs | Draws diagrams in Markdown as Mermaid code blocks instead of ASCII art — flowcharts, sequence, state, ER, and class diagrams. | `references/` |
 | [`pr-and-branch-hygiene`](pr-and-branch-hygiene/SKILL.md) | git | Branch naming, atomic commits, pre-push checks, and pull-request authoring that make changes easy to review and revert. | `assets/` |
 | [`research-and-report`](research-and-report/SKILL.md) | research | Produces a self-contained, reproducible Markdown report for investigations, comparisons, benchmarks, and experiments, with the verdict first and real numbers throughout. | `assets/` |
+| [`skill-authoring`](skill-authoring/SKILL.md) | authoring | Creates and improves agent skills in the open Agent Skills format — a precise triggering description, a lean SKILL.md, and scripts/, references/, assets/ and evals/ folders used for the right purposes — then validates the result. | `scripts/`, `references/`, `assets/` |
 | [`skill-eval-statistics`](skill-eval-statistics/SKILL.md) | evaluation | Applies sound statistics when designing, running, or reporting evaluations of agent skills — trigger rates, outcome pass rates, description tuning, and before/after comparisons. | `scripts/`, `references/`, `assets/` |
 | [`spec-before-code`](spec-before-code/SKILL.md) | design | Lightweight design-doc workflow — write a short Markdown spec with goals, non-goals, design, alternatives, and a mandatory threat model before implementing non-trivial work. | `assets/` |
 <!-- catalog:end -->
@@ -91,13 +98,24 @@ skill-name/
 └── evals/              # Trigger tests for maintainers (not needed at runtime)
 ```
 
-Conventions, enforced in CI by [`scripts/catalog.py`](scripts/catalog.py):
+Conventions, checked by the [`skill-authoring`](skill-authoring/SKILL.md) skill's validator ([`validate_skill.py`](skill-authoring/scripts/validate_skill.py)) and enforced in CI by [`scripts/catalog.py`](scripts/catalog.py):
 
 - **The description is the trigger.** It says what the skill does, when to use it ("Use when …"), and when not to ("Do not use …"), in under 1024 characters.
 - **Progressive disclosure.** `SKILL.md` stays short (under 500 lines); detail moves to `references/` and templates to `assets/`, linked one level deep.
 - **Self-contained and tool-agnostic.** Relative paths only, no tool-specific variables, no dependencies on other repositories. Skills may *mention* each other by name, but each one works alone.
 - **Folder name equals `name`**, in lowercase kebab-case.
 - **No personal or employer details.** A leak guard rejects work-item ids, cloud account ids and similar patterns.
+
+## Writing your own skills
+
+Install [`skill-authoring`](skill-authoring/SKILL.md) and ask your agent to create a skill. It scaffolds the folder with only the parts needed, writes a three-part description, puts content in `scripts/`, `references/` and `assets/` by purpose, and validates the result. Without an agent:
+
+```bash
+python3 skill-authoring/scripts/new_skill.py my-skill --dir .agents/skills --scripts --references
+python3 skill-authoring/scripts/validate_skill.py .agents/skills/my-skill
+```
+
+The reasoning behind each rule is in [its best-practices reference](skill-authoring/references/best-practices.md).
 
 ## Testing skills
 
@@ -111,7 +129,7 @@ Run each query several times with your agent, record one JSON line per run (`{"q
 |---|---|
 | `<skill>/` | One folder per skill |
 | `.claude-plugin/` | Claude Code plugin and marketplace manifests |
-| `scripts/catalog.py` | Validates skills; regenerates the table above and the docs-site catalog |
+| `scripts/catalog.py` | Validates skills (via `skill-authoring`'s validator, plus repository rules); regenerates the table above, the skill-count badge, and the docs-site catalog |
 | `scripts/install.sh` | Installs skills into any agent's folder |
 | `tests/` | Tests for bundled scripts |
 | `docs/` | GitHub Pages catalog |
