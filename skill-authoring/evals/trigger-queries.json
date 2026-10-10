@@ -1,0 +1,38 @@
+[
+  {
+    "query": "create a skill that teaches the agent our team's SQL formatting conventions",
+    "should_trigger": true
+  },
+  {
+    "query": "my SKILL.md never seems to load when I ask about release notes, can you fix it?",
+    "should_trigger": true
+  },
+  {
+    "query": "turn this deployment checklist we keep repeating into something Copilot can reuse",
+    "should_trigger": true
+  },
+  {
+    "query": "review this skill folder and tell me what's wrong with its structure",
+    "should_trigger": true
+  },
+  {
+    "query": "scaffold a new agent skill for generating changelogs",
+    "should_trigger": true
+  },
+  {
+    "query": "My skill's trigger rate went from 12/20 to 15/20, is that a real improvement?",
+    "should_trigger": false
+  },
+  {
+    "query": "write a README for this Python package",
+    "should_trigger": false
+  },
+  {
+    "query": "install the debugging-discipline skill into .github/skills",
+    "should_trigger": false
+  },
+  {
+    "query": "what are agent skills?",
+    "should_trigger": false
+  }
+]

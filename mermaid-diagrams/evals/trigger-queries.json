@@ -1,0 +1,34 @@
+[
+  {
+    "query": "Add an architecture diagram to the README showing how the API, queue and workers connect",
+    "should_trigger": true
+  },
+  {
+    "query": "show the order lifecycle states in the spec",
+    "should_trigger": true
+  },
+  {
+    "query": "can you sketch the login flow between browser, backend and the identity provider in the PR description?",
+    "should_trigger": true
+  },
+  {
+    "query": "document our database tables and how they relate, in the docs folder",
+    "should_trigger": true
+  },
+  {
+    "query": "Design a logo for the project",
+    "should_trigger": false
+  },
+  {
+    "query": "Make a slide deck explaining our architecture",
+    "should_trigger": false
+  },
+  {
+    "query": "Plot monthly revenue as a bar chart from this CSV",
+    "should_trigger": false
+  },
+  {
+    "query": "Explain the difference between a flowchart and a sequence diagram",
+    "should_trigger": false
+  }
+]

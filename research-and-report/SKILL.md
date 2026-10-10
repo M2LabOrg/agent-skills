@@ -1,103 +1,50 @@
 ---
 name: research-and-report
-description: Michel's standard format for investigations, comparisons, benchmarks, experiments, and any "go look into X and tell me what you find" task. Use whenever the user asks to investigate, compare, evaluate, benchmark, analyze, audit, profile, measure, or "find out" something — and a written deliverable (markdown report) is appropriate. Triggers on phrases like "investigate", "compare", "benchmark", "evaluate", "look into", "what's the impact of", "is X better than Y", "audit", and on any task that involves running multiple variants and writing up findings.
+description: Produces a self-contained, reproducible Markdown report for investigations, comparisons, benchmarks, and experiments, with the verdict first and real numbers throughout. Use when asked to investigate, compare, benchmark, evaluate, measure, audit, or "look into" something where several options or variants are tested and a written finding is the deliverable. Do not use for quick factual lookups (answer inline), single-bug investigations (use debugging-discipline), or design proposals (use spec-before-code).
+metadata:
+  category: research
 ---
 
 # Research and Report
 
-For any non-trivial investigation, produce a **self-contained markdown report** under `scripts/<topic>/` (or the project's equivalent). The report is the deliverable — chat summaries are not.
+For any non-trivial investigation, the committed report is the deliverable. A summary in chat is not.
 
-## 1. Folder Layout
+Use this skill when there are **several variants, measurable outcomes, and a decision to make**.
+
+## 1. Lay out the folder
 
 ```
-scripts/<topic>/
-├── README.md          # The report (entry point, always start here)
-├── data/              # Raw inputs, raw outputs, JSON dumps
-├── plots/             # Generated charts (if any)
-├── <script>.py        # Reproducible script that produced data/
-└── notes.md           # Optional: scratch / dead ends / negative results
+<reports-dir>/<topic>/
+├── README.md        # The report: start here
+├── <script>.py      # Reproducible script that produced data/
+├── data/            # Raw inputs and outputs
+├── plots/           # Generated charts, if any
+└── notes.md         # Optional: dead ends and negative results
 ```
 
-`<topic>` is kebab-case and descriptive: `swedish-caps-test`, `prompt-token-comparison`, `gender-consistency-eval`.
+Use the project's convention for `<reports-dir>` (for example `research/`, `docs/investigations/`, or `scripts/`). Name `<topic>` in kebab-case, descriptively: `prompt-token-comparison`, `cache-eviction-benchmark`.
 
-## 2. Report Structure (Use Exactly)
+## 2. Write the report
 
-```markdown
-# <Topic> — <One-Line Conclusion>
-
-**Date:** <YYYY-MM-DD>  **Author:** Michel  **Branch:** <branch>
-**Reproduces with:** `python3 scripts/<topic>/<script>.py`
-
-## TL;DR
-<2–4 sentences. State the verdict first. The reader should know the answer without scrolling.>
-
-## Question
-<What were we trying to find out? Why does it matter?>
-
-## Methodology
-- Inputs: <data sources, sample size, selection criteria>
-- Variants: <what was compared, how many runs each>
-- Environment: <local Docker / DEV / lib versions / model names>
-- Metrics: <how success was measured; pass criteria>
-
-## Results
-<Tables. Charts. Real numbers. Show the data, not adjectives.>
-
-| Variant | Metric A | Metric B | Pass rate |
-|---|---:|---:|---:|
-| baseline | ... | ... | ... |
-| candidate | ... | ... | ... |
-
-## Findings
-- <Concrete, specific finding tied to the data above>
-- ...
-
-## Verdict
-<Recommend / Do not recommend / Inconclusive — with reasoning. Tie to the original Question.>
-
-## Caveats / Threats to Validity
-<Sample size, confounders, things you could not test, where this might not generalize.>
-
-## Next Steps
-- [ ] <follow-up>
-- ...
-
-## Reproducing
-<Exact commands. Should work on a fresh checkout.>
-```
+Copy [assets/report-template.md](assets/report-template.md) to `<topic>/README.md` and fill it in. Its order is deliberate: **TL;DR and verdict first**, then question, method, results, findings, caveats, and how to reproduce.
 
 ## 3. Discipline
 
-- **Verdict first.** TL;DR appears before Methodology. Readers are busy.
-- **Show numbers, not adjectives.** "Faster" is not a finding; "23% lower p95 latency over 100 runs" is.
-- **Reproducibility is non-negotiable.** Anyone should be able to clone the repo, run the script, and regenerate `data/` and `plots/`. If your investigation isn't reproducible, it isn't done.
-- **Capture negative results.** A variant that *didn't* help is still data — log it in `notes.md` or in the report itself. Saves future-you (and others) from re-trying.
-- **Pin versions.** Note the exact container / layer / library version that produced each result. Reproductions in 6 months depend on it.
-- **Statistical honesty.** Note sample size. If n is small, say so. Don't average over 3 runs and call it benchmark data.
+- **Verdict first.** Readers should get the answer without scrolling.
+- **Numbers, not adjectives.** "Faster" is not a finding. "p95 latency 23% lower over 100 runs (95% CI 15–31%)" is.
+- **Reproducible or not done.** A fresh checkout plus the documented command must regenerate `data/` and `plots/`.
+- **Record negative results.** A variant that didn't help is data, and it saves someone repeating the work.
+- **Pin versions** of every library, model, service, and data set that produced a result.
+- **Statistical honesty.** State sample sizes. Give rates as `k/n` with intervals. Don't call a difference real when its interval includes zero. For evaluations of AI systems, apply the `skill-eval-statistics` skill.
 
-## 4. Posting Findings
+## 4. Share the findings
 
-- For Azure DevOps PBIs: post the TL;DR + Results table as an HTML-formatted PBI comment via `System.History`.
-- For GitHub issues: post markdown directly.
-- Always link to the report file in the repo so the full context is one click away.
+- Post the TL;DR and results table on the linked issue or work item.
+- Link to the committed report so the full context is one click away.
 
-## 5. When NOT to Use This Skill
+## Anti-patterns
 
-- Trivial fact-finding ("what version of node does X use?") — answer inline.
-- Simple bug investigations — use the `debugging-discipline` skill instead and capture findings in the PR description.
-- Use this skill when there are **multiple variants, measurable outcomes, and a decision to be made**.
-
-## 6. Examples in the Wild
-
-Reference these as templates:
-
-- `scripts/cross-paragraph-gender/` — eval-driven investigation
-- `scripts/title-subtitle-consistency/` — multi-model comparison + LaTeX report
-- `scripts/swedish-caps-test/` — focused single-question investigation
-
-## Anti-Patterns
-
-- Summary in chat, no committed report → it never happened.
-- Conclusions before methodology → cherry-picking risk.
-- "Run it yourself to see" → not a finding.
-- Mixing exploration code and the final reproducible script → keep `notes.md` separate.
+- Findings that exist only in chat.
+- Conclusions written before the method: a cherry-picking risk.
+- "Run it yourself to see" in place of a finding.
+- Mixing exploratory code with the final reproducible script. Keep exploration in `notes.md`.

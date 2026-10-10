@@ -1,0 +1,34 @@
+[
+  {
+    "query": "I renamed the --dry-run flag to --plan in the CLI, wrap this up for a PR",
+    "should_trigger": true
+  },
+  {
+    "query": "remove the legacy v1 endpoints from the API",
+    "should_trigger": true
+  },
+  {
+    "query": "I've added a new skill folder to this repo, anything else I need to touch?",
+    "should_trigger": true
+  },
+  {
+    "query": "ship the new retry config option",
+    "should_trigger": true
+  },
+  {
+    "query": "Write a getting-started tutorial for our SDK from scratch",
+    "should_trigger": false
+  },
+  {
+    "query": "rename the private helper _fmt to _format_row, it's only used in one file",
+    "should_trigger": false
+  },
+  {
+    "query": "Fix the typo in the error message in parser.py",
+    "should_trigger": false
+  },
+  {
+    "query": "Set up a GitHub Pages site for this repo",
+    "should_trigger": false
+  }
+]

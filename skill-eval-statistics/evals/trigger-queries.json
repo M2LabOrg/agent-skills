@@ -1,0 +1,38 @@
+[
+  {
+    "query": "I changed my skill's description and the trigger rate went from 9/20 to 14/20 — is the new one better?",
+    "should_trigger": true
+  },
+  {
+    "query": "how many test prompts and runs do I need to evaluate whether my skill triggers reliably?",
+    "should_trigger": true
+  },
+  {
+    "query": "write up the results of my skill A/B test for the team",
+    "should_trigger": true
+  },
+  {
+    "query": "my skill passed all 10 of its eval cases, can I say it works?",
+    "should_trigger": true
+  },
+  {
+    "query": "we're tuning a SKILL.md description over several iterations — how do we avoid fooling ourselves?",
+    "should_trigger": true
+  },
+  {
+    "query": "Write a new skill for formatting SQL",
+    "should_trigger": false
+  },
+  {
+    "query": "Is GPT or Claude better at summarizing our support tickets?",
+    "should_trigger": false
+  },
+  {
+    "query": "Run a t-test on these two columns of sales data",
+    "should_trigger": false
+  },
+  {
+    "query": "Fix the YAML frontmatter error in my SKILL.md",
+    "should_trigger": false
+  }
+]

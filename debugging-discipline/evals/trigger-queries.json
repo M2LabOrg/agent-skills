@@ -1,0 +1,38 @@
+[
+  {
+    "query": "The checkout total is wrong when the cart has a discount code and a free-shipping item — can you figure out why?",
+    "should_trigger": true
+  },
+  {
+    "query": "test_parse_dates passes locally but fails about one run in five on CI",
+    "should_trigger": true
+  },
+  {
+    "query": "Getting this after the upgrade:\nTypeError: Cannot read properties of undefined (reading 'map')\n    at renderList (list.tsx:42)",
+    "should_trigger": true
+  },
+  {
+    "query": "users in Sydney see yesterday's date on the dashboard, works fine for me",
+    "should_trigger": true
+  },
+  {
+    "query": "we need a hotfix, exports have been empty since this morning's deploy",
+    "should_trigger": true
+  },
+  {
+    "query": "Add a CSV export button to the reports page",
+    "should_trigger": false
+  },
+  {
+    "query": "Benchmark these three JSON parsers and tell me which is fastest",
+    "should_trigger": false
+  },
+  {
+    "query": "Explain how Python's garbage collector handles reference cycles",
+    "should_trigger": false
+  },
+  {
+    "query": "Refactor the payment module into smaller files, no behavior change",
+    "should_trigger": false
+  }
+]

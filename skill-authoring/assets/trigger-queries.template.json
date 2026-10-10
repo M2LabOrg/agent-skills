@@ -1,0 +1,10 @@
+[
+  { "query": "REPLACE: a realistic request that should load the skill, phrased the way a user would type it", "should_trigger": true },
+  { "query": "REPLACE: a request that needs the skill without naming its topic directly", "should_trigger": true },
+  { "query": "REPLACE: a casual or terse phrasing that should still load it", "should_trigger": true },
+  { "query": "REPLACE: a longer request with file paths, names and context", "should_trigger": true },
+  { "query": "REPLACE: a near-miss that shares keywords but needs a different skill", "should_trigger": false },
+  { "query": "REPLACE: a near-miss in the same domain but a different task", "should_trigger": false },
+  { "query": "REPLACE: a simple question the agent answers without any skill", "should_trigger": false },
+  { "query": "REPLACE: a request covered by a neighbouring skill", "should_trigger": false }
+]

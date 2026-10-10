@@ -1,100 +1,70 @@
 ---
 name: github-pages-generation
-description: Michel's methodology for spinning up a beautiful, low-maintenance GitHub Pages site for a repository — static HTML + TailwindCSS CDN by default, Jekyll only when needed. Use whenever the user asks to "create GitHub Pages", "publish docs", "make a landing page for the repo", "set up a project website", "enable Pages", "deploy a docs site", or wants a public showcase / index of repo contents (skills, packages, examples). Triggers on phrases like "GitHub Pages", "project website", "landing page", "docs site", "publish to gh-pages", "enable Pages on /docs", "make a site for this repo".
+description: Creates a polished, low-maintenance GitHub Pages site for a repository — static HTML in docs/ with a data-driven card grid by default, a static-site generator only when the content needs one. Use when asked to create GitHub Pages, publish docs, build a landing page or project website for a repo, enable Pages, or showcase repository contents (skills, packages, examples). Do not use for application front-ends, sites hosted outside GitHub Pages, or editing an existing generator-based docs site's content.
+metadata:
+  category: docs
 ---
 
 # GitHub Pages Generation
 
-A repeatable recipe for shipping a polished GitHub Pages site without a heavy build pipeline.
+Ship a polished site without a build pipeline unless the content demands one.
 
-## Decision tree
+## 1. Choose the setup
 
 ```mermaid
 flowchart TD
-    A[Need a site for this repo?] --> B{Content type?}
-    B -->|Single landing page + index of items| C[Static HTML + Tailwind CDN in /docs]
-    B -->|Many markdown pages, blog, versioned docs| D[Jekyll w/ just-the-docs or MkDocs Material]
-    B -->|App / interactive demo| E[Vite/Next static export to /docs or gh-pages branch]
-    C --> F[Enable Pages: Settings → Pages → Deploy from branch → main /docs]
-    D --> F
-    E --> G[GitHub Actions workflow → deploy to gh-pages]
+    A[Need a site for this repo?] --> B{Content?}
+    B -->|Landing page + index of items| C[Static HTML in docs/]
+    B -->|Many markdown pages, versioned docs, blog| D[Static-site generator: MkDocs Material, Docusaurus, Jekyll]
+    B -->|Interactive app or demo| E[Framework static export, deployed by a GitHub Actions workflow]
 ```
 
-**Default choice: static HTML in `/docs`.** Zero build step, instant preview locally (`open docs/index.html`), no Ruby/Node toolchain, looks great with Tailwind CDN + Lucide icons.
+**Default: static HTML in `docs/`.** No build step, previews by opening the file, no Ruby or Node toolchain.
 
-## Standard layout (`/docs`)
+## 2. Lay out `docs/`
 
 ```
 docs/
-  index.html          # landing page, hero + grid of items
-  style.css           # optional overrides on top of Tailwind CDN
-  assets/
-    og-image.png      # 1200x630 social preview
-    favicon.svg
-  _data.json          # optional: source of truth for the item list (read by JS)
+├── index.html       # From assets/index.html
+└── assets/
+    ├── favicon.svg  # From assets/favicon.svg, recolored
+    └── og-image.png # 1200×630 social preview
 ```
 
-Keep the **item list as JSON or as a `<script type="application/json">` block** so the same data can be regenerated from `SKILL.md` frontmatter (or `package.json`, etc.) by a script — see the companion `docs-sync-on-change` skill.
+Copy [assets/index.html](assets/index.html) and [assets/favicon.svg](assets/favicon.svg) as the starting point. The template renders its card grid from a JSON block, so a script can regenerate the item list from a single source of truth (see the `docs-sync-on-change` skill).
 
-## Required ingredients
+## 3. Fill in the required parts
 
-1. **Hero section** — repo name, one-sentence purpose, primary CTA (GitHub link, install command).
-2. **Card grid** — one card per item (skill / package / example) with title, scope/badge, 1-line description, link to source.
-3. **"How to use" section** — copy-pasteable install / clone / load commands.
-4. **Footer** — author, license, link back to repo, last-updated timestamp.
-5. **`<meta>` tags** — `description`, `og:title`, `og:image`, `og:url`, `twitter:card`.
-6. **Favicon** — even a 1-line SVG is fine.
-7. **Mobile-responsive** — Tailwind handles this if you use `grid-cols-1 md:grid-cols-2 lg:grid-cols-3`.
+1. **Hero:** repository name, one-sentence purpose, a primary call to action (install command or GitHub link).
+2. **Card grid:** one card per item, with title, category, one-line description, and a link to its source.
+3. **How to use:** copy-pasteable install or usage commands.
+4. **Footer:** author, license, repository link, last-updated date.
+5. **Meta tags:** `description`, `og:title`, `og:description`, `og:image`, `og:url`, `twitter:card`.
+6. **Favicon:** a one-line SVG is enough.
+7. **Responsive layout and dark mode:** the template handles both. Check at phone width before publishing.
 
-## Tailwind CDN starter
+## 4. Enable Pages
 
-Use the Play CDN (`https://cdn.tailwindcss.com`) for zero-build sites. For production-grade bundles, switch to the CLI build, but for a personal repo index the CDN is fine.
+Pick one:
 
-```html
-<!doctype html>
-<html lang="en" class="scroll-smooth">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{{ Repo Name }} — {{ Tagline }}</title>
-  <meta name="description" content="{{ One-line description }}" />
-  <meta property="og:title" content="{{ Repo Name }}" />
-  <meta property="og:description" content="{{ One-line description }}" />
-  <meta property="og:type" content="website" />
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <style>body{font-family:'Inter',ui-sans-serif,system-ui,sans-serif}</style>
-</head>
-<body class="bg-slate-950 text-slate-100">
-  <!-- hero, grid, footer -->
-</body>
-</html>
-```
+- **Branch deploy:** Settings → Pages → Source: *Deploy from a branch* → `main`, folder `/docs`.
+- **Actions deploy:** Settings → Pages → Source: *GitHub Actions*, plus a workflow using `actions/upload-pages-artifact` and `actions/deploy-pages` with `path: docs`. Use this when a build step is needed.
 
-## Enabling Pages
+The site appears at `https://<owner>.github.io/<repo>/` within a minute or two. For a custom domain, add `docs/CNAME` containing the domain and point a DNS `CNAME` record at `<owner>.github.io`.
 
-1. Push `docs/` to `main` (or `master`).
-2. GitHub repo → **Settings → Pages**.
-3. Source: **Deploy from a branch**.
-4. Branch: `main`, folder: `/docs`. Save.
-5. Wait ~30s, then visit `https://<user-or-org>.github.io/<repo>/`.
+## 5. When to move beyond static HTML
 
-For custom domain: add `docs/CNAME` containing the bare domain, configure DNS `CNAME` → `<user>.github.io`.
+| Need | Use |
+|---|---|
+| Search across many pages | MkDocs Material or Docusaurus |
+| Versioned docs | Docusaurus, or MkDocs with `mike` |
+| API reference generated from code | TypeDoc, Sphinx, or Doxygen output |
+| Blog | Jekyll or Astro |
 
 ## Anti-patterns
 
-- **Don't** dump a giant README into `index.html` — curate.
-- **Don't** ship a Jekyll site if you only have one page — overkill.
-- **Don't** hardcode the item list in HTML *and* in markdown — pick one source of truth and generate the other (see `docs-sync-on-change`).
-- **Don't** forget `og:image` — it makes the link look professional when shared.
-- **Don't** check in `node_modules/` or build artefacts; if you need a build step, deploy via GitHub Actions to the `gh-pages` branch instead.
-
-## When to upgrade beyond static HTML
-
-- Need search across many pages → MkDocs Material or Docusaurus.
-- Need versioned docs → Docusaurus or `mike` (MkDocs).
-- Need API reference auto-generated from code → TypeDoc / Sphinx / Doxygen.
-- Need blog → Jekyll or Astro.
-
-For everything else: **one `index.html`, one Tailwind CDN, ship it.**
+- Pasting the whole README into `index.html`: curate instead.
+- A generator for a single page.
+- Maintaining the item list by hand in both the README and the site: generate one from the other.
+- Missing `og:image`: shared links look broken without it.
+- Committing build output or `node_modules/` to `main`: build in a workflow instead.
